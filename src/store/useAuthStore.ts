@@ -5,8 +5,9 @@ import {
   signOut, 
   type User 
 } from 'firebase/auth';
-import { FirebaseError } from 'firebase/app'; 
-import { auth } from '../lib/firebase';
+import { FirebaseError } from 'firebase/app';
+import { doc, setDoc } from 'firebase/firestore'; 
+import { auth, db } from '../lib/firebase';       
 import { toast } from '../utils/toast';
 
 interface AuthState {
@@ -25,14 +26,22 @@ export const useAuthStore = create<AuthState>((set) => ({
   register: async (email, pass) => {
     set({ isLoading: true });
     try {
-      await createUserWithEmailAndPassword(auth, email, pass);
+      const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
+      const user = userCredential.user;
+
+      await setDoc(doc(db, "users", user.uid), {
+        uid: user.uid,
+        email: user.email,
+        createdAt: new Date().toISOString()
+      });
+
       toast.success("Акаунт створено успішно!");
     } catch (error) {
       console.error(error);
       if (error instanceof FirebaseError) {
         toast.error(getErrorMessage(error.code));
       } else {
-        toast.error("Невідома помилка при реєстрації");
+        toast.error("Помилка реєстрації");
       }
     } finally {
       set({ isLoading: false });
@@ -63,7 +72,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       set({ user: null });
       toast.info("Ви вийшли з системи");
     } catch (error) {
-        console.error(error);
+      console.error(error);
       toast.error("Помилка при виході");
     } finally {
       set({ isLoading: false });
@@ -80,7 +89,7 @@ function getErrorMessage(errorCode: string): string {
     case 'auth/wrong-password': return 'Невірний пароль';
     case 'auth/email-already-in-use': return 'Цей Email вже зайнятий';
     case 'auth/weak-password': return 'Пароль занадто простий (мін. 6 символів)';
-    case 'auth/invalid-credential': return 'Невірні дані для входу'; 
+    case 'auth/invalid-credential': return 'Невірні дані';
     default: return 'Сталася помилка. Спробуйте ще раз.';
   }
 }

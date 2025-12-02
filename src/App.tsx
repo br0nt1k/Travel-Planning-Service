@@ -5,9 +5,10 @@ import { auth } from './lib/firebase';
 import { useAuthStore } from './store/useAuthStore';
 
 import AuthPage from './pages/AuthPage';
-import LoginForm from './components/auth/LoginPage';       
-import RegisterForm from './components/auth/RegisterPage'; 
-import MyTripsPage from './pages/MyTripsPage';             
+import LoginForm from './components/auth/LoginPage';
+import RegisterForm from './components/auth/RegisterPage';
+import MyTripsPage from './pages/MyTripsPage';
+import TripDetailsPage from './pages/TripDetailsPage'; 
 import Spinner from './components/ui/Spinner';
 
 function App() {
@@ -35,6 +36,10 @@ function App() {
         element={user ? <MyTripsPage /> : <Navigate to="/login" />} 
       />
       <Route 
+        path="/trips/:id" 
+        element={user ? <TripDetailsPage /> : <Navigate to="/login" />} 
+      />
+      <Route 
         path="/login" 
         element={
           !user ? (
@@ -58,6 +63,7 @@ function App() {
           )
         } 
       />
+      <Route path="*" element={<Navigate to="/" />} />
     </Routes>
   );
 }

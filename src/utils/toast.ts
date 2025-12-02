@@ -1,41 +1,51 @@
-import iziToast from "izitoast";
-import "izitoast/dist/css/iziToast.min.css"; 
+import iziToast from 'izitoast';
+import "izitoast/dist/css/iziToast.min.css";
 
 iziToast.settings({
-  timeout: 4000, 
-  resetOnHover: true, 
-  position: "topRight",
-  transitionIn: "fadeInLeft",
-  transitionOut: "fadeOutRight",
-  progressBar: true,
+  timeout: 3000,
+  resetOnHover: true,
+  transitionIn: 'fadeInLeft',
+  transitionOut: 'fadeOutRight',
 });
 
 export const toast = {
-  success: (message: string, title: string = "Успіх") => {
-    iziToast.success({
-      title,
-      message,
-    });
+  success: (message: string) => {
+    iziToast.success({ title: 'OK', message, position: 'topRight' });
   },
-
-  error: (message: string, title: string = "Помилка") => {
-    iziToast.error({
-      title,
-      message,
-    });
+  error: (message: string) => {
+    iziToast.error({ title: 'Помилка', message, position: 'topRight' });
   },
-
-  info: (message: string, title: string = "Інфо") => {
-    iziToast.info({
-      title,
-      message,
-    });
+  info: (message: string) => {
+    iziToast.info({ title: 'Інфо', message, position: 'topRight' });
   },
-  
-  warning: (message: string, title: string = "Увага") => {
-    iziToast.warning({
-      title,
-      message,
-    });
+  warning: (message: string) => {
+    iziToast.warning({ title: 'Увага', message, position: 'topRight' });
   }
+};
+
+export const confirmAction = (
+  message: string, 
+  onConfirm: () => Promise<void> | void,
+  title: string = 'Ви впевнені?'
+) => {
+  iziToast.question({
+    timeout: 20000,
+    close: false,
+    overlay: true,
+    displayMode: 1, 
+    id: 'question',
+    zindex: 9999,
+    title: title,
+    message: message,
+    position: 'center',
+    buttons: [
+      ['<button><b>Так</b></button>', async function (instance: any, toast: any) {
+        instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+        await onConfirm();
+      }, true], 
+      ['<button>Скасувати</button>', function (instance: any, toast: any) {
+        instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+      }, false]
+    ]
+  });
 };
